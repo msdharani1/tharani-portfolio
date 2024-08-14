@@ -42,7 +42,7 @@ function Home({ scrollPosition }) {
       <img src={pic} alt="Your profile" className='middle' />
       </div>
       <div className="right-content">
-        <h2>Other Profiles</h2>
+        <h2 className='prof-text'>Other Profiles</h2>
       <div className="links flex">
           <div className='flex'>
             <FaYoutube color='red' />
