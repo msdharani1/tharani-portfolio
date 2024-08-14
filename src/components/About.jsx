@@ -16,7 +16,7 @@ function About({ scrollPosition }) {
       }}
     >
       <h2>About Me</h2>
-      <p>I'm a web developer, working on various projects including freelancing, personal app development, and more.</p>
+      <p>I am a front-end developer and musician with a diverse portfolio, including corporate websites, mobile apps, and music showcases. I specialize in creating user-friendly, responsive designs that blend technical skill with creativity.</p>
       
       <h3>Skills</h3>
       <div className="skills">
@@ -30,8 +30,8 @@ function About({ scrollPosition }) {
       </div>
 
       <h3>Education</h3>
-      <p>BCA (finish 2024) at <a href="https://kaliswaricollege.edu.in/" target="_blank" rel="noopener noreferrer">SKC</a></p>
-      <p>MCA (pursuing) at <a href="https://rathinamtechnicalcampus.com/" target="_blank" rel="noopener noreferrer">Rathinam College</a></p>
+      <p>BCA, Graduated in 2024, <a href="https://kaliswaricollege.edu.in/" target="_blank" rel="noopener noreferrer">SKC</a></p>
+      <p>MCA, Currently Enrolled, <a href="https://rathinamtechnicalcampus.com/" target="_blank" rel="noopener noreferrer">Rathinam College</a></p>
     </div>
   );
 }
