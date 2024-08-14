@@ -29,7 +29,7 @@ function Home({ scrollPosition }) {
             style={{ display: 'inline-block', marginLeft: '10px', color: '#3498db' }}
           />
         </h1>
-        <p>Passionate about Creating responsive and user-friendly web experiences.</p>
+        <p>Passionate about creating responsive and user-friendly web experiences.</p>
       </div>
       <div 
         className="circle" 
