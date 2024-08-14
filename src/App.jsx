@@ -1,6 +1,6 @@
 // App.jsx
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import Home from './components/Home';
 import About from './components/About';
@@ -12,9 +12,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 import './Admin.css';
 
-function App() {
+function MainContent() {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [currentSection, setCurrentSection] = useState('home');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const homeRef = useRef(null);
+  const aboutRef = useRef(null);
+  const projectsRef = useRef(null);
+  const contactRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,21 +29,75 @@ function App() {
       setScrollPosition(position);
 
       const windowHeight = window.innerHeight;
-      if (position < windowHeight) {
-        setCurrentSection('home');
-      } else if (position < windowHeight * 2) {
-        setCurrentSection('about');
-      } else if (position < windowHeight * 3) {
-        setCurrentSection('projects');
+      let newSection;
+      let newPath;
+
+      if (position < windowHeight * 0.5) {
+        newSection = 'home';
+        newPath = '/';
+      } else if (position < windowHeight * 1.5) {
+        newSection = 'about';
+        newPath = '/about';
+      } else if (position < windowHeight * 2.5) {
+        newSection = 'projects';
+        newPath = '/projects';
       } else {
-        setCurrentSection('contact');
+        newSection = 'contact';
+        newPath = '/contact';
+      }
+
+      setCurrentSection(newSection);
+      if (location.pathname !== newPath) {
+        navigate(newPath, { replace: true });
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [navigate, location.pathname]);
 
+  useEffect(() => {
+    const scrollToSection = (multiplier) => {
+      const windowHeight = window.innerHeight;
+      window.scrollTo({
+        top: windowHeight * multiplier,
+        behavior: 'smooth'
+      });
+    };
+
+    // This timeout ensures that the scroll happens after the route change
+    setTimeout(() => {
+      switch (location.pathname) {
+        case '/':
+          scrollToSection(0);
+          break;
+        case '/about':
+          scrollToSection(1);
+          break;
+        case '/projects':
+          scrollToSection(2);
+          break;
+        case '/contact':
+          scrollToSection(3);
+          break;
+        default:
+          scrollToSection(0);
+      }
+    }, 100);
+  }, [location.pathname]);
+
+  return (
+    <>
+      <Home scrollPosition={scrollPosition} ref={homeRef} />
+      <About scrollPosition={scrollPosition} ref={aboutRef} />
+      <Projects scrollPosition={scrollPosition} ref={projectsRef} />
+      <Contact scrollPosition={scrollPosition} ref={contactRef} />
+      <div className="current-section">{currentSection}</div>
+    </>
+  );
+}
+
+function App() {
   return (
     <HelmetProvider>
       <Router>
@@ -72,15 +133,10 @@ function App() {
           </Helmet>
 
           <Routes>
-            <Route path="/" element={
-              <>
-                <Home scrollPosition={scrollPosition} />
-                <About scrollPosition={scrollPosition} />
-                <Projects scrollPosition={scrollPosition} />
-                <Contact scrollPosition={scrollPosition} />
-                <div className="current-section">{currentSection}</div>
-              </>
-            } />
+            <Route path="/" element={<MainContent />} />
+            <Route path="/about" element={<MainContent />} />
+            <Route path="/projects" element={<MainContent />} />
+            <Route path="/contact" element={<MainContent />} />
             <Route path="/msd-admin" element={<Admin />} />
             <Route 
               path="/addProjectInfo" 

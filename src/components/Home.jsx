@@ -1,15 +1,15 @@
 // Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { forwardRef } from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import pic from '../assets/pic.webp';
 import { FaYoutube } from "react-icons/fa";
 import { TbWorld } from "react-icons/tb";
 
-function Home({ scrollPosition }) {
+const Home = forwardRef(({ scrollPosition }, ref) => {
   const circleSize = Math.min(300 + scrollPosition / 0.9, window.innerHeight * 2);
 
   return (
-    <div className="home">
+    <div className="home" ref={ref}>
       <div className="left-content">
         <h1>I'm  
           <TypeAnimation
@@ -39,11 +39,11 @@ function Home({ scrollPosition }) {
         }}
       ></div>
       <div>
-      <img src={pic} alt="Your profile" className='middle' />
+        <img src={pic} alt="Your profile" className='middle' />
       </div>
       <div className="right-content">
         <h2 className='prof-text flex'>Other Profiles</h2>
-      <div className="links flex">
+        <div className="links flex">
           <div className='flex'>
             <FaYoutube color='red' />
             <a href="https://youtube.com/c/@MSDharaniOfficial" target="_blank" rel="noopener noreferrer">YouTube</a>
@@ -56,6 +56,6 @@ function Home({ scrollPosition }) {
       </div>
     </div>
   );
-}
+});
 
 export default Home;
