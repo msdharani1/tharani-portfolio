@@ -1,11 +1,10 @@
-// Contact.jsx
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, forwardRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function Contact({ scrollPosition }) {
-  const form = useRef();
+const Contact = forwardRef(({ scrollPosition }, ref) => {
+  const form = ref || useRef();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [errors, setErrors] = useState({});
@@ -105,6 +104,6 @@ function Contact({ scrollPosition }) {
       <ToastContainer position="bottom-right" className="custom-toast-container" />
     </div>
   );
-}
+});
 
 export default Contact;

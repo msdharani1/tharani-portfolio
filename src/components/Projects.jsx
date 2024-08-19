@@ -1,12 +1,11 @@
-// Projects.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { FaChevronLeft, FaChevronRight, FaTimes } from 'react-icons/fa';
-import { ref, onValue } from 'firebase/database';
+import { ref as firebaseRef, onValue } from 'firebase/database';
 import { database } from '../firebase';
 import { FaHtml5, FaCss3Alt, FaJs, FaReact, FaMobile, FaBootstrap, FaWind, FaFireAlt } from 'react-icons/fa';
 import { useSwipeable } from 'react-swipeable';
 
-function Projects({ scrollPosition }) {
+const Projects = forwardRef(({ scrollPosition }, ref) => {
   const [projects, setProjects] = useState([]);
   const [cardIndex, setCardIndex] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
@@ -15,7 +14,7 @@ function Projects({ scrollPosition }) {
   const [visibleCards, setVisibleCards] = useState(3);
 
   useEffect(() => {
-    const projectsRef = ref(database, 'projects');
+    const projectsRef = firebaseRef(database, 'projects');
     onValue(projectsRef, (snapshot) => {
       const data = snapshot.val();
       const projectsList = data ? Object.entries(data).map(([id, project]) => ({ id, ...project })) : [];
@@ -25,12 +24,17 @@ function Projects({ scrollPosition }) {
 
   useEffect(() => {
     const handleResize = () => {
-      setVisibleCards(window.innerWidth < 768 ? 1 : 3);
+      if (window.innerWidth < 768) {
+        setVisibleCards(1); // 1 card for smaller devices
+      } else {
+        setVisibleCards(3); // 3 cards for larger devices
+      }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
 
   const maxIndex = Math.max(0, projects.length - visibleCards);
 
@@ -43,7 +47,7 @@ function Projects({ scrollPosition }) {
   const handleScrollLeft = () => {
     setCardIndex((prevIndex) => Math.max(0, prevIndex - 1));
   };
-
+  
   const handleScrollRight = () => {
     setCardIndex((prevIndex) => Math.min(maxIndex, prevIndex + 1));
   };
@@ -91,11 +95,11 @@ function Projects({ scrollPosition }) {
   });
 
   return (
-    <div className="projects">
+    <div className="projects" ref={ref}>
       <div 
         {...handlers}
         className="project-container" 
-        style={{ transform: `translateX(-${cardIndex * (100 / visibleCards)}%)` }}
+        style={{ transform: `translateX(-${cardIndex * 100 / visibleCards}%)` }}
       >
         {projects.map((project) => (
           <div key={project.id} className="project-card">
@@ -148,6 +152,6 @@ function Projects({ scrollPosition }) {
       )}
     </div>
   );
-}
+});
 
 export default Projects;

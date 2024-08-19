@@ -1,9 +1,8 @@
-// About.jsx
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { FaHtml5, FaCss3, FaReact } from 'react-icons/fa';
 import { SiTailwindcss, SiBootstrap, SiFirebase } from 'react-icons/si';
 
-function About({ scrollPosition }) {
+const About = forwardRef(({ scrollPosition }, ref) => {
   const opacity = Math.max(0, Math.min((scrollPosition - window.innerHeight / 2) / 300, 1));
   const translateY = Math.max(0, 100 - scrollPosition / 5);
 
@@ -14,6 +13,7 @@ function About({ scrollPosition }) {
         opacity,
         transform: `translateY(${translateY}px)`
       }}
+      ref={ref} // Assign the ref here
     >
       <h2>About Me</h2>
       <p>I am a front-end developer and musician with a diverse portfolio, including corporate websites, mobile apps, and music showcases. I specialize in creating user-friendly, responsive designs that blend technical skill with creativity.</p>
@@ -34,6 +34,6 @@ function About({ scrollPosition }) {
       <p>MCA, Currently Enrolled, <a href="https://rathinamtechnicalcampus.com/" target="_blank" rel="noopener noreferrer">Rathinam College</a></p>
     </div>
   );
-}
+});
 
 export default About;
