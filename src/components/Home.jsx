@@ -50,7 +50,7 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
           </div>
           <div className='flex'>
             <TbWorld color='lightblue' />
-            <a href="https://www.artistmsdharani.com" target="_blank" rel="noopener noreferrer">Music</a>
+            <a href="https://www.music.msdharani.com" target="_blank" rel="noopener noreferrer">Music</a>
           </div>
         </div>
       </div>
