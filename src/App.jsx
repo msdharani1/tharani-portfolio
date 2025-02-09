@@ -9,7 +9,7 @@ import Contact from './components/Contact';
 import Admin from './components/Admin';
 import ProjectManagement from './components/ProjectManagement';
 import ProtectedRoute from './components/ProtectedRoute';
-import './App.css';
+// import './App.css';
 import './Admin.css';
 
 function MainContent() {
