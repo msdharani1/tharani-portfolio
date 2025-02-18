@@ -1,11 +1,10 @@
-// components/ProjectManagement.jsx
 import React, { useState, useEffect } from 'react';
 import { database, auth } from '../firebase';
 import { ref, onValue, push, update, remove } from 'firebase/database';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import ProjectForm from './ProjectForm';
-import ProjectCard from './ProjectCard';
+import ProjectCardForAdmin from './ProjectCardForAdmin';
 
 function ProjectManagement() {
   const [projects, setProjects] = useState([]);
@@ -63,13 +62,22 @@ function ProjectManagement() {
     .sort((a, b) => filter === 'new' ? b.timestamp - a.timestamp : a.timestamp - b.timestamp);
 
   return (
-    <div className="project-management">
-      <div className="project-management-header">
-        <h2>Project Management</h2>
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Project Management</h2>
+        <button 
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+        >
+          Logout
+        </button>
       </div>
-      <div className="controls">
-        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+      <div className="flex gap-4 mb-6">
+        <select 
+          value={filter} 
+          onChange={(e) => setFilter(e.target.value)}
+          className="px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
           <option value="new">Newest</option>
           <option value="old">Oldest</option>
         </select>
@@ -78,8 +86,14 @@ function ProjectManagement() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search projects"
+          className="px-3 py-2 border rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button onClick={handleAddProject}>Add Project</button>
+        <button 
+          onClick={handleAddProject}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          Add Project
+        </button>
       </div>
       {showForm && (
         <ProjectForm
@@ -88,9 +102,9 @@ function ProjectManagement() {
           onSubmit={() => setShowForm(false)}
         />
       )}
-      <div className="project-list">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.map((project) => (
-          <ProjectCard
+          <ProjectCardForAdmin
             key={project.id}
             project={project}
             onEdit={() => handleEditProject(project)}
