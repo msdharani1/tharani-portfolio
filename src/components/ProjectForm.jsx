@@ -15,6 +15,7 @@ function ProjectForm({ project, onClose, onSubmit }) {
     bootstrap: false,
     tailwindCss: false,
     firebase: false,
+    nextjs: false,
   });
   const [demoLink, setDemoLink] = useState('');
   const [loading, setLoading] = useState(false);

@@ -22,6 +22,7 @@ export const getLanguageIcon = (language) => {
     case 'bootstrap': return FaBootstrap;
     case 'tailwindCss': return SiTailwindcss;
     case 'firebase': return FaFireAlt;
+    case 'nextjs' : return FaReact;
     default: return null;
   }
 };
