@@ -29,6 +29,8 @@ const Projects = forwardRef(({ scrollPosition }, ref) => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setVisibleCards(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCards(2);
       } else {
         setVisibleCards(3);
       }
@@ -37,14 +39,6 @@ const Projects = forwardRef(({ scrollPosition }, ref) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Handle scroll-based card index
-  const maxIndex = Math.max(0, projects.length - visibleCards);
-  useEffect(() => {
-    const scrollPercentage = Math.max(0, Math.min((scrollPosition - window.innerHeight * 2) / window.innerHeight, 1));
-    const newIndex = Math.floor(scrollPercentage * maxIndex);
-    setCardIndex(newIndex);
-  }, [scrollPosition, maxIndex]);
 
   // Image slideshow in modal
   useEffect(() => {
@@ -63,6 +57,7 @@ const Projects = forwardRef(({ scrollPosition }, ref) => {
   };
   
   const handleScrollRight = () => {
+    const maxIndex = Math.max(0, projects.length - visibleCards);
     setCardIndex((prevIndex) => Math.min(maxIndex, prevIndex + 1));
   };
 
@@ -86,10 +81,18 @@ const Projects = forwardRef(({ scrollPosition }, ref) => {
     trackMouse: true
   });
 
+  const opacity = Math.max(0, Math.min((scrollPosition - window.innerHeight * 1.5) / 300, 1));
+  const translateY = Math.max(0, 100 - scrollPosition / 5);
+
   return (
     <section 
       ref={ref}
-      className="relative min-h-screen bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center py-20 px-4 md:px-8 sticky top-0 overflow-hidden"
+      className="relative min-h-screen bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center py-20 px-4 md:px-8 overflow-hidden"
+      style={{
+        opacity,
+        transform: `translateY(${translateY}px)`,
+        transition: 'opacity 0.5s ease, transform 0.5s ease'
+      }}
     >
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -97,42 +100,68 @@ const Projects = forwardRef(({ scrollPosition }, ref) => {
         <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-t from-cyan-500/20 to-transparent rounded-full blur-3xl" />
       </div>
 
-      {/* Added Title */}
-      <h1 className="text-4xl md:text-5xl font-bold text-white mb-12 text-center relative z-10">
+      {/* Title */}
+      <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-12 text-center relative z-10">
         Featured Projects
       </h1>
 
       <div className="relative w-full max-w-6xl mx-auto">
-        <div 
-          {...handlers}
-          className="flex gap-4 transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${cardIndex * 100 / visibleCards}%)` }}
-        >
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onViewDetails={() => openModal(project)}
-            />
-          ))}
+        {/* Projects Container */}
+        <div className="overflow-hidden">
+          <div 
+            {...handlers}
+            className="flex gap-4 transition-transform duration-500 ease-in-out"
+            style={{ 
+              transform: `translateX(-${cardIndex * (100 / visibleCards)}%)`,
+              width: `${(projects.length / visibleCards) * 100}%`
+            }}
+          >
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onViewDetails={() => openModal(project)}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="absolute bottom-[-100px] left-1/2 -translate-x-1/2 flex gap-4">
-          <button 
-            onClick={handleScrollLeft}
-            disabled={cardIndex === 0}
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <FaChevronLeft />
-          </button>
-          <button 
-            onClick={handleScrollRight}
-            disabled={cardIndex === maxIndex}
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <FaChevronRight />
-          </button>
-        </div>
+        {/* Navigation Buttons */}
+        {projects.length > visibleCards && (
+          <div className="flex justify-center gap-4 mt-8">
+            <button 
+              onClick={handleScrollLeft}
+              disabled={cardIndex === 0}
+              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-white/10 hover:border-cyan-500/50"
+            >
+              <FaChevronLeft />
+            </button>
+            <button 
+              onClick={handleScrollRight}
+              disabled={cardIndex >= projects.length - visibleCards}
+              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border border-white/10 hover:border-cyan-500/50"
+            >
+              <FaChevronRight />
+            </button>
+          </div>
+        )}
+
+        {/* Dots Indicator */}
+        {projects.length > visibleCards && (
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from({ length: Math.ceil(projects.length / visibleCards) }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCardIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                  Math.floor(cardIndex / visibleCards) === index 
+                    ? 'bg-cyan-500' 
+                    : 'bg-white/30 hover:bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {modalOpen && selectedProject && (
