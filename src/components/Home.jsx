@@ -1,32 +1,60 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import { FaYoutube, FaFileDownload } from "react-icons/fa";
 import { TbWorld } from "react-icons/tb";
+import { ref, onValue } from 'firebase/database';
+import { database } from '../firebase';
 import pic from '../assets/pic.webp';
 import pdf from "../assets/THARANI-M-cv.pdf";
 
 const Home = forwardRef(({ scrollPosition }, ref) => {
   const [showThankYou, setShowThankYou] = useState(false);
+  const [cvLink, setCvLink] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
   const circleSize = Math.min(300 + scrollPosition / 0.9, window.innerHeight * 2);
+
+  // Fetch CV link from Firebase
+  useEffect(() => {
+    const cvLinkRef = ref(database, 'settings/cvLink');
+    const unsubscribe = onValue(cvLinkRef, (snapshot) => {
+      const data = snapshot.val();
+      setCvLink(data || '');
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleDownload = async (e) => {
     e.preventDefault();
+    setIsDownloading(true);
+    
     try {
-      const response = await fetch(pdf);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = "THARANI-M-cv.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Use the CV link from Firebase if available, otherwise fallback to local PDF
+      const downloadUrl = cvLink || pdf;
+      
+      if (cvLink) {
+        // For external links, open in new tab
+        window.open(cvLink, '_blank');
+      } else {
+        // For local PDF, download directly
+        const response = await fetch(pdf);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = "THARANI-M-cv.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
       
       setShowThankYou(true);
       setTimeout(() => setShowThankYou(false), 3000);
     } catch (error) {
       console.error('Download failed:', error);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -77,10 +105,20 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
           </p>
           <button 
             onClick={handleDownload}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25"
+            disabled={isDownloading}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FaFileDownload className="w-5 h-5" />
-            Download CV
+            {isDownloading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Downloading...
+              </>
+            ) : (
+              <>
+                <FaFileDownload className="w-5 h-5" />
+                Download CV
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -123,10 +161,20 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
           </p>
           <button 
             onClick={handleDownload}
-            className="relative cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25"
+            disabled={isDownloading}
+            className="relative cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FaFileDownload className="w-5 h-5" />
-            Download CV
+            {isDownloading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Downloading...
+              </>
+            ) : (
+              <>
+                <FaFileDownload className="w-5 h-5" />
+                Download CV
+              </>
+            )}
           </button>
         </div>
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { database, auth } from '../firebase';
-import { ref, onValue, push, update, remove } from 'firebase/database';
+import { ref, onValue, push, update, remove, set } from 'firebase/database';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, LogOut, Filter, Grid, Calendar } from 'lucide-react';
+import { Search, Plus, LogOut, Filter, Grid, Calendar, Download, Save, Edit3, Link } from 'lucide-react';
 import ProjectForm from './ProjectForm';
 import ProjectCardForAdmin from './ProjectCardForAdmin';
 
@@ -13,6 +13,10 @@ function ProjectManagement() {
   const [editProject, setEditProject] = useState(null);
   const [filter, setFilter] = useState('new');
   const [searchTerm, setSearchTerm] = useState('');
+  const [cvLink, setCvLink] = useState('');
+  const [isEditingCvLink, setIsEditingCvLink] = useState(false);
+  const [tempCvLink, setTempCvLink] = useState('');
+  const [isSavingCvLink, setIsSavingCvLink] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,6 +28,18 @@ function ProjectManagement() {
         ? Object.entries(projectsData).map(([key, value]) => ({ id: key, ...value })) 
         : [];
       setProjects(projectsList);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Fetch CV link from Firebase
+    const cvLinkRef = ref(database, 'settings/cvLink');
+    const unsubscribe = onValue(cvLinkRef, (snapshot) => {
+      const data = snapshot.val();
+      setCvLink(data || '');
+      setTempCvLink(data || '');
     });
 
     return () => unsubscribe();
@@ -47,6 +63,23 @@ function ProjectManagement() {
         console.error('Error deleting project:', error);
       }
     }
+  };
+
+  const handleSaveCvLink = async () => {
+    setIsSavingCvLink(true);
+    try {
+      await set(ref(database, 'settings/cvLink'), tempCvLink);
+      setCvLink(tempCvLink);
+      setIsEditingCvLink(false);
+    } catch (error) {
+      console.error('Error saving CV link:', error);
+    }
+    setIsSavingCvLink(false);
+  };
+
+  const handleCancelCvEdit = () => {
+    setTempCvLink(cvLink);
+    setIsEditingCvLink(false);
   };
 
   const handleLogout = async () => {
@@ -80,7 +113,7 @@ function ProjectManagement() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">Project Management</h1>
-                <p className="text-gray-400">Manage your portfolio projects</p>
+                <p className="text-gray-400">Manage your portfolio projects and settings</p>
               </div>
             </div>
             <button 
@@ -90,6 +123,95 @@ function ProjectManagement() {
               <LogOut className="w-4 h-4" />
               Logout
             </button>
+          </div>
+        </div>
+
+        {/* CV Link Management */}
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg">
+              <Download className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-white">CV Download Link</h3>
+              <p className="text-gray-400 text-sm">Manage the CV download link for your homepage</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {isEditingCvLink ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    CV Download URL
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Link className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="url"
+                      value={tempCvLink}
+                      onChange={(e) => setTempCvLink(e.target.value)}
+                      placeholder="https://example.com/your-cv.pdf"
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-500/50 text-white placeholder-gray-400 transition-colors"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveCvLink}
+                    disabled={isSavingCvLink}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg hover:from-emerald-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    {isSavingCvLink ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save Link
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleCancelCvEdit}
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg border border-white/10 hover:border-white/20 transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex-1">
+                  {cvLink ? (
+                    <div>
+                      <p className="text-white font-medium mb-1">Current CV Link:</p>
+                      <a 
+                        href={cvLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 hover:text-cyan-300 transition-colors break-all"
+                      >
+                        {cvLink}
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No CV link set. Click edit to add one.</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setIsEditingCvLink(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg border border-blue-500/20 hover:border-blue-500/40 transition-all duration-200 ml-4"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Edit
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
