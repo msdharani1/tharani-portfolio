@@ -24,33 +24,75 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
     return () => unsubscribe();
   }, []);
 
- const handleDownload = async (e) => {
-  e.preventDefault();
-  setIsDownloading(true);
+  const handleDownload = async (e) => {
+    e.preventDefault();
+    setIsDownloading(true);
 
-  try {
-    const downloadUrl = cvLink || pdf;
+    try {
+      // Use Firebase CV link if available, otherwise use local PDF
+      const downloadUrl = cvLink || pdf;
+      
+      // Check if it's a local file or external URL
+      if (downloadUrl === pdf) {
+        // Handle local PDF file
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = "THARANI-M-cv.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Handle external PDF URL
+        try {
+          // Try to fetch and download as blob first (for CORS-enabled URLs)
+          const response = await fetch(downloadUrl, { mode: 'cors' });
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "THARANI-M-cv.pdf";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } else {
+            throw new Error('Fetch failed');
+          }
+        } catch (fetchError) {
+          // If fetch fails (CORS issues), open in new tab
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.target = '_blank';
+          link.download = "THARANI-M-cv.pdf";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
 
-    const response = await fetch(downloadUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = "THARANI-M-cv.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    setShowThankYou(true);
-    setTimeout(() => setShowThankYou(false), 3000);
-  } catch (error) {
-    console.error('Download failed:', error);
-  } finally {
-    setIsDownloading(false);
-  }
-};
-
+      setShowThankYou(true);
+      setTimeout(() => setShowThankYou(false), 3000);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: try to open the URL in a new tab
+      try {
+        const fallbackUrl = cvLink || pdf;
+        window.open(fallbackUrl, '_blank');
+        setShowThankYou(true);
+        setTimeout(() => setShowThankYou(false), 3000);
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        alert('Download failed. Please try again later.');
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const ThankYouMessage = () => (
     <div className="fixed top-4 right-4 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full text-white flex items-center gap-2 animate-fade-in-down z-50">
