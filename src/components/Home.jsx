@@ -24,39 +24,33 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
     return () => unsubscribe();
   }, []);
 
-  const handleDownload = async (e) => {
-    e.preventDefault();
-    setIsDownloading(true);
-    
-    try {
-      // Use the CV link from Firebase if available, otherwise fallback to local PDF
-      const downloadUrl = cvLink || pdf;
-      
-      if (cvLink) {
-        // For external links, open in new tab
-        window.open(cvLink, '_blank');
-      } else {
-        // For local PDF, download directly
-        const response = await fetch(pdf);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = "THARANI-M-cv.pdf";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
-      
-      setShowThankYou(true);
-      setTimeout(() => setShowThankYou(false), 3000);
-    } catch (error) {
-      console.error('Download failed:', error);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+ const handleDownload = async (e) => {
+  e.preventDefault();
+  setIsDownloading(true);
+
+  try {
+    const downloadUrl = cvLink || pdf;
+
+    const response = await fetch(downloadUrl);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "THARANI-M-cv.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    setShowThankYou(true);
+    setTimeout(() => setShowThankYou(false), 3000);
+  } catch (error) {
+    console.error('Download failed:', error);
+  } finally {
+    setIsDownloading(false);
+  }
+};
+
 
   const ThankYouMessage = () => (
     <div className="fixed top-4 right-4 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full text-white flex items-center gap-2 animate-fade-in-down z-50">
