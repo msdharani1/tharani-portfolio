@@ -30,7 +30,7 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
 
     try {
       // Use Firebase CV link if available, otherwise use local PDF
-      const downloadUrl = cvLink || pdf;
+      const downloadUrl = cvLink || "https://firebasestorage.googleapis.com/v0/b/msd-portfolio.appspot.com/o/THARANI-M-CV.pdf?alt=media&token=f751ad83-1863-480c-982d-64cdb7244ccf";
       
       // Check if it's a local file or external URL
       if (downloadUrl === pdf) {
