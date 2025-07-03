@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useEffect } from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import { FaYoutube, FaFileDownload } from "react-icons/fa";
 import { TbWorld } from "react-icons/tb";
-import { ref, onValue } from 'firebase/database';
+import { ref as dbRef, onValue } from 'firebase/database';
 import { database } from '../firebase';
 import pic from '../assets/pic.webp';
 import pdf from "../assets/THARANI-M-cv.pdf";
@@ -15,7 +15,7 @@ const Home = forwardRef(({ scrollPosition }, ref) => {
 
   // Fetch CV link from Firebase
   useEffect(() => {
-    const cvLinkRef = ref(database, 'settings/cvLink');
+    const cvLinkRef = dbRef(database, 'settings/cvLink');
     const unsubscribe = onValue(cvLinkRef, (snapshot) => {
       const data = snapshot.val();
       setCvLink(data || '');
